@@ -88,23 +88,28 @@ def draw_price(intermediate):
     fig.savefig('price.png')
 
 
-def print_step(ws, i, step, i_value):
-    for j, x in enumerate((i_value, step.x_strat, step.y_strat, *step.x, *step.y,
-     step.v_upper, step.v_lower, step.eps)):
-        ws.write(i, j, x)        
+def float_to_str(x):
+    return '{:.3f}'.format(float(x))
 
+
+def print_step(ws, i, step, i_value):
+    for j, x in enumerate((i_value, step.x_strat + 1, step.y_strat + 1, *step.x, *step.y,
+     float_to_str(step.v_upper), float_to_str(step.v_lower), float_to_str(step.eps))):
+        ws.write(i, j, str(x))        
 
 
 def print_steps(intermediate):
     wb = xlwt.Workbook()
     ws = wb.add_sheet('Brown Robinson')
-    print_step(ws, 0, Br_rob_step('x strat', 'y strat',
-     ('x_{}'.format(i + 1) for i in range(len(b.x))),
-     ('y_{}'.format(i + 1) for i in range(len(b.y))), 'v^/k', 'v_/k', 'eps'), 'k')
+    titles = ('k', 'x strat', 'y strat',
+     *('x_{}'.format(i + 1) for i in range(len(intermediate[0].x))),
+      *('y_{}'.format(i + 1) for i in range(len(intermediate[0].y))),
+       'v^/k', 'v_/k', 'eps')
+    for j, title in enumerate(titles):
+        ws.write(0, j, title)  
     for i, step in enumerate(intermediate):
         print_step(ws, i+1, step, i+1)
     wb.save('br_rob.xls')
-
 
 
 def exact_solution(C):
