@@ -131,7 +131,7 @@ def main():
     draw_eps(intermediate)
     draw_price(intermediate)
     print_steps(intermediate)
-    print('Analytic results:\nx={}, y={}, v={}\n'.format(printable_vector(x),
+    print('Analytical results:\nx={}, y={}, v={}\n'.format(printable_vector(x),
      printable_vector(y), printable_vector(v)))
     print('Numerical results:\nx={}, y={}, {}<=v<={}, eps={}, iterations={}\n'
         .format(printable_vector(x_), printable_vector(y_), printable_vector(v_lower),
