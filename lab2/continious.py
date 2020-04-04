@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from sage.all import *
+sys.path.append('../lab1')
 from brown_robinson import br_rob, max_with_index, min_with_index
 
 
