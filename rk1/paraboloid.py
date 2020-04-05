@@ -46,15 +46,8 @@ def game_price_by_simulations(points, t_max, a, r, simulations):
     return wins / simulations
 
 
-def draw_spheres(ax, points, r):
-    u = np.linspace(0, 2 * np.pi, 10)
-    v = np.linspace(0, np.pi, 10)
-    x = r * np.outer(np.cos(u), np.sin(v))
-    y = r * np.outer(np.sin(u), np.sin(v))
-    z = r * np.outer(np.ones(np.size(u)), np.cos(v))
-    # ax.plot_surface(x, y, z, color='b')
+def draw_points(ax, points, r):
     for point in points:
-        # ax.plot_surface(x + point[0], y + point[1], z + point[2], color='r')
         ax.scatter(*point, color='r')
 
 
@@ -80,14 +73,13 @@ def main():
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    draw_spheres(ax, points, r)
+    draw_points(ax, points, r)
     draw_paraboloid(ax, t_max, a)
 
     v = game_price_by_simulations(points, t_max, a, r, simulations)
     print(f'v = {v}')
     
     plt.show()
-    # fig.savefig('kek.png')
 
 
 if __name__ == '__main__':
