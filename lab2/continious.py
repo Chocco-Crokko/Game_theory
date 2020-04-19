@@ -3,13 +3,17 @@ import numpy as np
 from sage.all import *
 sys.path.append('../lab1')
 from brown_robinson import br_rob, max_with_index, min_with_index
+from collections import deque
 
+
+LAST_VALUES_TO_CONSIDER = 10
+DEVIATION_THRESHOLD = 0.001
 
 def h(x, y, a, b, c, d, e):
     return a*x**2 + b*y**2 + c*x*y + d*x + e*y
 
 
-def get_settle(m):
+def get_saddle(m):
     minmax = None
     minmax_ij = None
     for i, row in enumerate(m.rows()):
@@ -68,29 +72,48 @@ def find_closest(M, value):
     return i, j, M[i][j]
 
 
+def print_numerical_step(k, m, saddle, x, y, H):
+    print(f'N = {k}')
+    print_matrix(m)
+    if saddle is None:
+        print('There is no saddle point, finding solution with Brown-Robinson\'s method:')
+        print('x = {}, y = {}, H = {}'.format(
+                *(rational_to_str(val) for val in (x, y, H))))
+    else:
+        print('saddle point:\nx = {}, y = {}, H = {}'.format(
+                *(rational_to_str(v) for v in (x, y, H))))
+    print('')
+
+
 def numerical_solution(a, b, c, d, e, N):
-    for k in range(2, N + 1):
+    k = 1
+    last_h = deque()
+    while True:
+        k += 1
         n = k
         n_matrix = n + 1
         m = Matrix(n_matrix, n_matrix, lambda i, j: h(i/n, j/n, a, b, c, d, e))
-        print(f'N = {k}')
-        print_matrix(m)
-        s = get_settle(m)
+        s = get_saddle(m)
         if s is None:
-            print('There is no settle point, finding solution with Brown-Robinson\'s method:')
-            x, y, v_upper, v_lower, iterations = br_rob(m, eps_threshold=0.01)
+            x_, y_, v_upper, v_lower, iterations = br_rob(m, eps_threshold=0.01)
             i, j, v = find_closest(m, (v_upper + v_lower) / 2)
-            print('x = {}, y = {}, H = {}'.format(
-                *(rational_to_str(val) for val in (i/n, j/n, v))))
+            x, y, H = i/n, j/n, v
         else:
-            print('Settle point:\nx = {}, y = {}, H = {}'.format(
-                *(rational_to_str(v) for v in (s[0]/n, s[1]/n, h(s[0]/n, s[1]/n, a, b, c, d, e)))))
-        print('')
+            x, y, H = s[0]/n, s[1]/n, h(s[0]/n, s[1]/n, a, b, c, d, e)
+        if k <= N:
+            print_numerical_step(k, m, s, x, y, H)
+        last_h.append(H)
+        if len(last_h) == LAST_VALUES_TO_CONSIDER:
+            dev = sqrt(variance(last_h))
+            if dev < DEVIATION_THRESHOLD:
+                print_numerical_step(k, m, s, x, y, H)
+                break
+            last_h.popleft()
 
 
 def main():
     if len(sys.argv) < 2:
-        print('Usage: <program_name> <N>')
+        print('Usage: <program_name> <N_print>')
         return
     N = int(sys.argv[1])
     # a = -3
